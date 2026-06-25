@@ -168,3 +168,41 @@ def test_judge_must_differ_from_model_under_test():
     scn = Scenario(id="s", input={}, adapter=lambda i: {"t": "x"}, scorers=[JudgeScorer("j", "c")])
     with pytest.raises(ValueError, match="differ"):
         run(Suite([scn]), model_under_test="seq-judge-1", judge_backend=SeqJudge([True]))
+
+
+def test_observed_deterministic_fail_not_masked_by_flake():
+    # sample 1 fails (a != 1); sample 2 raises (missing key -> indeterminate).
+    # An observed FAIL must dominate so the regression gate still catches it.
+    adapter = SeqAdapter([{"a": 0}, {}])
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=adapter,
+        samples=2,
+        scorers=[check("a_is_1", lambda o: o["a"] == 1)],
+    )
+    r = _run([scn])
+    assert r.scenarios[0].checks[0].status == FAIL
+
+
+def test_judge_k_zero_always_passes():
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=lambda i: {"t": "x"},
+        samples=2,
+        scorers=[JudgeScorer("j", "c", k=0)],
+    )
+    r = _run([scn], judge_backend=SeqJudge([False, False]))  # 0 verified, k=0 -> pass
+    assert r.scenarios[0].checks[0].status == PASS
+
+
+def test_duplicate_scorer_names_rejected():
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=lambda i: {"a": 1},
+        scorers=[check("dup", lambda o: True), check("dup", lambda o: False)],
+    )
+    with pytest.raises(ValueError, match="duplicate scorer"):
+        _run([scn])

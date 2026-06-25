@@ -38,10 +38,12 @@ def run(
     root: Annotated[str, typer.Option("--root", help="Consumer repo root (holds .edd/)")] = ".",
 ) -> None:
     suite = load_suite(spec)
-    if samples is not None:
-        suite.scenarios = [dataclasses.replace(s, samples=samples) for s in suite.scenarios]
-
     cfg = load_config(root)
+    effective_samples = samples if samples is not None else cfg.samples
+    if effective_samples is not None:
+        suite.scenarios = [
+            dataclasses.replace(s, samples=effective_samples) for s in suite.scenarios
+        ]
     judge_backend = None
     if not no_judge and cfg.judge_backend:
         judge_backend = resolve_backend(cfg.judge_backend, model_under_test=model)

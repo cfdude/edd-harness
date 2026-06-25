@@ -55,14 +55,27 @@ def _is_judge(scorer: Any) -> bool:
 
 
 def _fold(kind: str, per_sample: list[str], k: int) -> str:
-    """Per-scorer fold. Any INDETERMINATE sample => INDETERMINATE (never a false fail).
-    Deterministic: all N must pass. Judge: at least k of N verified."""
-    if INDETERMINATE in per_sample:
-        return INDETERMINATE
+    """Per-scorer fold. An OBSERVED failure dominates a flake (mirrors scenario precedence) so a
+    real failure is never masked into INDETERMINATE and slipped past the gate.
+
+    Deterministic (must pass all N): any FAIL -> FAIL; else any INDETERMINATE -> INDETERMINATE;
+    else PASS. Judge (k-of-N): >=k verified -> PASS; else if even counting flakes as verified it
+    could still reach k -> INDETERMINATE (undecidable); else -> FAIL.
+    """
+    fails = per_sample.count(FAIL)
+    indet = per_sample.count(INDETERMINATE)
+    verified = per_sample.count(PASS)
     if kind == "judge":
-        verified = sum(1 for s in per_sample if s == PASS)
-        return PASS if verified >= k else FAIL
-    return PASS if all(s == PASS for s in per_sample) else FAIL
+        if verified >= k:
+            return PASS
+        if verified + indet >= k:
+            return INDETERMINATE
+        return FAIL
+    if fails:
+        return FAIL
+    if indet:
+        return INDETERMINATE
+    return PASS
 
 
 def _scenario_verdict(checks: list[CheckResult]) -> str:
@@ -109,6 +122,11 @@ def run(
         n = max(1, scenario.samples)
         outputs: list[dict[str, Any]] = []
         names = [sc.name for sc in scorers]
+        if len(names) != len(set(names)):
+            raise ValueError(
+                f"duplicate scorer name(s) in scenario {scenario.id!r}; names are the baseline "
+                f"join key and must be unique: {names}"
+            )
         per_sample: dict[str, list[str]] = {name: [] for name in names}
         reasons: dict[str, str] = dict.fromkeys(names, "")
         metas: dict[str, dict] = {name: {} for name in names}
@@ -139,7 +157,11 @@ def run(
         checks: list[CheckResult] = []
         for sc in scorers:
             kind = kinds[sc.name]
-            k = sc.k if (kind == "judge" and getattr(sc, "k", None)) else math.ceil(n / 2)
+            k = (
+                sc.k
+                if (kind == "judge" and getattr(sc, "k", None) is not None)
+                else math.ceil(n / 2)
+            )
             status = _fold(kind, per_sample[sc.name], k)
             checks.append(
                 CheckResult(
