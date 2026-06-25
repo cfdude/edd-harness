@@ -27,6 +27,17 @@ class JudgeBackend(Protocol):
     def verify(self, rendered: str, criteria: str) -> Verdict: ...
 
 
+def build_grading_prompt(rendered: str, criteria: str) -> str:
+    """A model-agnostic grading prompt that demands a strict binary JSON verdict."""
+    return (
+        "You are a strict evaluator. Decide whether the SUBJECT satisfies the CRITERION.\n"
+        'Answer with ONLY a JSON object: {"verified": <true|false>, "reason": "<one sentence>"}.'
+        "\nDo not include any other text.\n\n"
+        f"CRITERION:\n{criteria}\n\n"
+        f"SUBJECT:\n{rendered}\n"
+    )
+
+
 def parse_verdict(text: str) -> Verdict:
     """Parse a strict ``{"verified": bool, "reason": str}`` object from judge output.
 
