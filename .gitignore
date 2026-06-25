@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Virtualenv / uv
+.venv/
+venv/
+.uv/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Eval run artifacts (corpus results are per-run, not source)
+results/
+
+# Editor / local
+.idea/
+.vscode/
+*.swp
+.claude/settings.local.json
