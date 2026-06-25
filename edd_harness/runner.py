@@ -96,9 +96,7 @@ def run(
     if needs_judge:
         backend = judge_backend or resolve_backend(model_under_test=model_under_test)
         if backend.model == model_under_test:
-            raise ValueError(
-                f"judge_model ({backend.model!r}) must differ from model_under_test"
-            )
+            raise ValueError(f"judge_model ({backend.model!r}) must differ from model_under_test")
         judge_model = backend.model
 
     results: list[ScenarioResult] = []

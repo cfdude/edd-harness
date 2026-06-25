@@ -62,37 +62,53 @@ def test_independent_evaluation_records_every_scorer(monkeypatch):
 
 def test_deterministic_fold_requires_all_samples():
     adapter = SeqAdapter([{"a": 1}, {"a": 0}, {"a": 1}])  # one sample fails
-    scn = Scenario(id="s", input={}, adapter=adapter, samples=3,
-                   scorers=[check("a_is_1", lambda o: o["a"] == 1)])
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=adapter,
+        samples=3,
+        scorers=[check("a_is_1", lambda o: o["a"] == 1)],
+    )
     r = _run([scn])
     assert r.scenarios[0].checks[0].status == FAIL
 
 
 def test_judge_fold_k_of_n_majority_passes():
-    scn = Scenario(id="s", input={}, adapter=lambda i: {"t": "x"}, samples=3,
-                   scorers=[JudgeScorer("j", "c")])
+    scn = Scenario(
+        id="s", input={}, adapter=lambda i: {"t": "x"}, samples=3, scorers=[JudgeScorer("j", "c")]
+    )
     # 2 of 3 verified -> default k = ceil(3/2) = 2 -> pass
     r = _run([scn], judge_backend=SeqJudge([True, False, True]))
     assert r.scenarios[0].checks[0].status == PASS
 
 
 def test_judge_fold_below_k_fails():
-    scn = Scenario(id="s", input={}, adapter=lambda i: {"t": "x"}, samples=3,
-                   scorers=[JudgeScorer("j", "c")])
+    scn = Scenario(
+        id="s", input={}, adapter=lambda i: {"t": "x"}, samples=3, scorers=[JudgeScorer("j", "c")]
+    )
     r = _run([scn], judge_backend=SeqJudge([True, False, False]))  # 1/3 < 2
     assert r.scenarios[0].checks[0].status == FAIL
 
 
 def test_per_scorer_configurable_k():
-    scn = Scenario(id="s", input={}, adapter=lambda i: {"t": "x"}, samples=3,
-                   scorers=[JudgeScorer("j", "c", k=3)])  # require all 3
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=lambda i: {"t": "x"},
+        samples=3,
+        scorers=[JudgeScorer("j", "c", k=3)],
+    )  # require all 3
     r = _run([scn], judge_backend=SeqJudge([True, True, False]))  # 2/3 < 3
     assert r.scenarios[0].checks[0].status == FAIL
 
 
 def test_scorer_raise_is_indeterminate_not_fail():
-    scn = Scenario(id="s", input={}, adapter=lambda i: {"a": 1},
-                   scorers=[check("bad_key", lambda o: o["missing"] == 1)])
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=lambda i: {"a": 1},
+        scorers=[check("bad_key", lambda o: o["missing"] == 1)],
+    )
     r = _run([scn])
     assert r.scenarios[0].checks[0].status == INDETERMINATE
     assert r.scenarios[0].verdict == INDETERMINATE
@@ -109,23 +125,31 @@ def test_adapter_raise_is_indeterminate():
 
 
 def test_non_json_output_is_indeterminate():
-    scn = Scenario(id="s", input={}, adapter=lambda i: {"o": object()},
-                   scorers=[check("x", lambda o: True)])
+    scn = Scenario(
+        id="s", input={}, adapter=lambda i: {"o": object()}, scorers=[check("x", lambda o: True)]
+    )
     r = _run([scn])
     assert r.scenarios[0].verdict == INDETERMINATE
 
 
 def test_verdict_precedence_fail_over_indeterminate():
-    scn = Scenario(id="s", input={}, adapter=lambda i: {"a": 0},
-                   scorers=[check("fails", lambda o: o["a"] == 1),
-                            check("raises", lambda o: o["missing"])])
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=lambda i: {"a": 0},
+        scorers=[check("fails", lambda o: o["a"] == 1), check("raises", lambda o: o["missing"])],
+    )
     r = _run([scn])
     assert r.scenarios[0].verdict == FAIL  # fail beats indeterminate
 
 
 def test_no_judge_skips_judge_scorers():
-    scn = Scenario(id="s", input={}, adapter=lambda i: {"a": 1},
-                   scorers=[check("a", lambda o: o["a"] == 1), JudgeScorer("j", "c")])
+    scn = Scenario(
+        id="s",
+        input={},
+        adapter=lambda i: {"a": 1},
+        scorers=[check("a", lambda o: o["a"] == 1), JudgeScorer("j", "c")],
+    )
     r = _run([scn], no_judge=True)
     names = [c.name for c in r.scenarios[0].checks]
     assert names == ["a"]  # judge scorer omitted, no backend resolved
