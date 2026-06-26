@@ -64,7 +64,13 @@ edd rescore .edd/runs/<run>.jsonl mypkg.corpus:SCENARIOS         # re-grade stor
 `--no-judge` skips judge scorers for fast deterministic iteration; `--tags` filters scenarios;
 `--samples` overrides the per-scenario sample count.
 
+## Integrating into a project
+
+For the full why / when / where / how of adopting edd-harness in a consuming project (adapter,
+corpus layout, judge cost setup, `.edd/` baseline, CI gate), see
+**[docs/integration-guide.md](docs/integration-guide.md)**.
+
 ## Design
 
-See `openspec/changes/edd-harness-v1/` (spec) and
-`docs/superpowers/specs/2026-06-25-edd-harness-v1-design.md` (approved design).
+See `openspec/specs/` (the archived spec record), `openspec/changes/archive/2026-06-25-edd-harness-v1/`
+(the change), and `docs/superpowers/specs/2026-06-25-edd-harness-v1-design.md` (approved design).
