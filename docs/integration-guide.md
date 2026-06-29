@@ -77,7 +77,7 @@ SCENARIOS = [
         id="case/clean-positive",
         input=load_fixture("clean_positive.json"),
         adapter=adapter,
-        samples=3,                                    # de-noise the gate
+        samples=3,                                    # K>=3 (see "Lessons"); K=2 was not stable
         tags=("smoke",),
         scorers=[
             check("decided", lambda o: o["decision"] in {"YES", "NO"}),
@@ -135,6 +135,26 @@ edd rescore .edd/runs/<run>.jsonl your_pkg.evals.corpus:SCENARIOS
 three-valued: **pass / fail / indeterminate**, and `indeterminate` (adapter raised, judge
 unavailable, shape drift) is excluded from regression accounting so flakes never masquerade as
 regressions.
+
+## Lessons from the first consumer (consumer)
+
+The a consumer project multi-agent deliberation was the first real adopter. Two empirical findings worth
+heeding before you trust your gate:
+
+- **Use K ≥ 3 samples for a trustworthy deterministic gate.** At `samples=2`, *no-change* runs
+  produced **false deterministic regressions** — the gate cried wolf. At `samples=3`, two
+  back-to-back no-change runs showed **zero** deterministic regressions. So a deterministic
+  REGRESSED at K ≥ 3 genuinely means behavior changed; below that, it may just be noise.
+- **Treat deterministic and judge regressions differently.** Judge invariants flip run-to-run
+  **even with no change** (the judge is itself stochastic), whereas deterministic relational
+  invariants are stable at K ≥ 3. Practical rule:
+  - a **deterministic** REGRESSED → **do-not-ship** (block the merge);
+  - a **judge** REGRESSED → **advisory** — review it, don't auto-block.
+
+  edd-harness's `compare` currently classifies all checks uniformly; the deliberation consumer split
+  its own gate on `scorer_type` (deterministic block vs stochastic judge review). Until the engine
+  promotes that split (see the v2 backlog), do the same in your CI: gate on deterministic
+  REGRESSED, surface judge REGRESSED as a warning.
 
 ## Project-specific adoption
 
