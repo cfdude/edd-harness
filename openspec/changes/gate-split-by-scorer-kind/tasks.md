@@ -5,9 +5,9 @@
 
 ## 1. Comparison carries scorer kind
 
-- [ ] 1.1 `compare.py`: add `kind` to `CheckComparison`, sourced from the current run's
+- [x] 1.1 `compare.py`: add `kind` to `CheckComparison`, sourced from the current run's
   `CheckResult.kind`; populate it for every item
-- [ ] 1.2 `compare.py`: add `Comparison.blocking_regressions` (deterministic REGRESSED),
+- [x] 1.2 `compare.py`: add `Comparison.blocking_regressions` (deterministic REGRESSED),
   `advisory_regressions` (judge REGRESSED), and `has_blocking_regression`; keep `has_regression`
   meaning "any regressed"
 
@@ -15,7 +15,7 @@
 
 - [ ] 2.1 `store.py`: `bless` writes `{status, kind}` per check; baseline reader tolerates pre-v2
   entries that have only `status`
-- [ ] 2.2 `compare.py`: derive each check's kind from the current run (baseline-persisted `kind`
+- [x] 2.2 `compare.py`: derive each check's kind from the current run (baseline-persisted `kind`
   is forward-looking for the deferred vanished-check feature; no fallback logic in v2)
 
 ## 3. Gate semantics + CLI
