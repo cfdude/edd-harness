@@ -7,7 +7,7 @@ from typing import Annotated
 
 import typer
 
-from .compare import REGRESSED, compare_run
+from .compare import compare_run
 from .config import load_config
 from .judge.factory import resolve_backend
 from .runner import run as run_suite
@@ -35,6 +35,10 @@ def run(
         int | None, typer.Option("--samples", help="Override samples per scenario")
     ] = None,
     no_judge: Annotated[bool, typer.Option("--no-judge", help="Skip judge scorers")] = False,
+    strict: Annotated[
+        bool,
+        typer.Option("--strict", help="With --baseline: treat judge regressions as blocking too"),
+    ] = False,
     root: Annotated[str, typer.Option("--root", help="Consumer repo root (holds .edd/)")] = ".",
 ) -> None:
     suite = load_suite(spec)
@@ -62,7 +66,13 @@ def run(
     if baseline:
         cmp = compare_run(result, root=root)
         typer.echo(_format_comparison(cmp))
-        if cmp.has_regression:
+        for adv in cmp.advisory_regressions:
+            typer.echo(
+                f"ADVISORY: judge check regressed (not blocking): "
+                f"{adv.scenario_id}::{adv.scorer_name}"
+            )
+        blocking = cmp.has_regression if strict else cmp.has_blocking_regression
+        if blocking:
             typer.echo("REGRESSION detected.")
             raise typer.Exit(code=1)
 
@@ -113,6 +123,8 @@ def _format_comparison(cmp) -> str:
         f"(was={i.baseline_status}, now={i.current_status})"
         for i in cmp.items
     ]
-    regressed = sum(1 for i in cmp.items if i.classification == REGRESSED)
-    lines.append(f"-- {len(cmp.items)} check(s), {regressed} regressed --")
+    lines.append(
+        f"-- {len(cmp.items)} check(s); {len(cmp.blocking_regressions)} blocking, "
+        f"{len(cmp.advisory_regressions)} advisory regression(s) --"
+    )
     return "\n".join(lines)

@@ -20,10 +20,10 @@
 
 ## 3. Gate semantics + CLI
 
-- [ ] 3.1 `cli.py`: `run --baseline` exits non-zero on `has_blocking_regression` only; judge
+- [x] 3.1 `cli.py`: `run --baseline` exits non-zero on `has_blocking_regression` only; judge
   regressions print as `ADVISORY` and do not gate
-- [ ] 3.2 `cli.py`: add `--strict` — treat all regressions as blocking (exit non-zero on any)
-- [ ] 3.3 `cli.py`: `report` / `_format_comparison` shows the blocking-vs-advisory split
+- [x] 3.2 `cli.py`: add `--strict` — treat all regressions as blocking (exit non-zero on any)
+- [x] 3.3 `cli.py`: `report` / `_format_comparison` shows the blocking-vs-advisory split
 
 ## 4. Docs + verification
 
