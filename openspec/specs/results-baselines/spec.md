@@ -18,11 +18,19 @@ The `bless` operation SHALL write `.edd/baseline.json` keyed by `(scenario_id, s
 - **THEN** `baseline.json` is written keyed by `(scenario_id, scorer_name)` under the `{model_under_test, judge_model}` axis key
 
 ### Requirement: Before/after comparison and regression gate
-When a run is invoked with `--baseline` (`baseline=True`) and a blessed baseline exists for the current axis key, the engine SHALL join the current run to the baseline per `(scenario_id, scorer_name)` for the same axis key and classify each as NEW, REGRESSED, FIXED, STABLE, or INDETERMINATE. Any REGRESSED result MUST cause `edd run --baseline` to exit non-zero. INDETERMINATE results MUST be excluded from regression accounting and MUST never be classified as REGRESSED. Comparison and the gate are owned by `edd run --baseline` (and reported by `edd report`); `bless` never gates.
+When a run is invoked with `--baseline` (`baseline=True`) and a blessed baseline exists for the current axis key, the engine SHALL join the current run to the baseline per `(scenario_id, scorer_name)` for the same axis key and classify each as NEW, REGRESSED, FIXED, STABLE, or INDETERMINATE. Each REGRESSED check SHALL be partitioned by scorer kind: a **deterministic** REGRESSED is **blocking**, a **judge** REGRESSED is **advisory**. `edd run --baseline` SHALL exit non-zero when there is any blocking (deterministic) regression; advisory (judge) regressions SHALL be reported but MUST NOT by themselves cause a non-zero exit. When `--strict` is supplied, ALL regressions (deterministic and judge) SHALL be treated as blocking. INDETERMINATE results MUST be excluded from regression accounting and MUST never be classified as REGRESSED. Comparison and the gate are owned by `edd run --baseline` (and reported by `edd report`); `bless` never gates.
 
-#### Scenario: Regression fails the gate
-- **WHEN** `edd run --baseline` is invoked and a check that was `pass` in the baseline is now `fail` (or a judge verdict flips verified true→false)
-- **THEN** it is classified REGRESSED and the run exits non-zero
+#### Scenario: Deterministic regression blocks the gate
+- **WHEN** `edd run --baseline` is invoked and a deterministic check that was `pass` in the baseline is now `fail`
+- **THEN** it is classified REGRESSED + blocking and the run exits non-zero
+
+#### Scenario: Judge regression is advisory
+- **WHEN** `edd run --baseline` is invoked and a judge check that was `pass` in the baseline is now `fail` (verified true→false), with no deterministic regression
+- **THEN** it is classified REGRESSED + advisory, reported as ADVISORY, and the run exits zero
+
+#### Scenario: Strict mode blocks on a judge regression
+- **WHEN** `edd run --baseline --strict` is invoked and a judge check regresses
+- **THEN** the run exits non-zero
 
 #### Scenario: Indeterminate is not a regression
 - **WHEN** a check that was `pass` in the baseline is now indeterminate
@@ -49,4 +57,22 @@ Baselines and runs SHALL be plain JSON in git so that `git diff .edd/baseline.js
 #### Scenario: Report summarizes a run
 - **WHEN** `edd report <run-id>` is invoked
 - **THEN** it prints a regression-focused classification summary of the run versus its baseline
+
+### Requirement: Comparison surfaces scorer kind and blocking vs advisory regressions
+Each comparison item SHALL carry the scorer `kind` (`deterministic` | `judge`). The `Comparison` result SHALL expose `blocking_regressions` (deterministic REGRESSED), `advisory_regressions` (judge REGRESSED), and `has_blocking_regression`. `has_regression` SHALL remain true when ANY check regressed (deterministic or judge) and is informational; the default gate is driven by `has_blocking_regression`.
+
+#### Scenario: Judge-only regression is non-blocking
+- **WHEN** a comparison contains a judge REGRESSED and no deterministic REGRESSED
+- **THEN** `has_blocking_regression` is false, `has_regression` is true, and `advisory_regressions` lists the judge check
+
+### Requirement: Baseline persists scorer kind
+`bless` SHALL record each check's `kind` alongside its `status` in `baseline.json`. `compare` SHALL derive each check's kind from the current run; the persisted baseline `kind` is forward-looking — reserved for the deferred vanished-check feature — and is not otherwise consumed in this capability. Baselines blessed before this capability (status only) SHALL still load.
+
+#### Scenario: Bless records kind
+- **WHEN** `bless` writes the baseline
+- **THEN** each check entry includes its `kind` alongside `status`
+
+#### Scenario: Pre-existing baseline without kind still loads
+- **WHEN** a baseline entry has only `status` (no `kind`)
+- **THEN** `compare` still classifies the check, using the current run's kind
 
