@@ -11,7 +11,7 @@ The library SHALL expose an immutable `Scenario` (`id`, opaque `input`, `adapter
 - **THEN** the engine passes `input` to the adapter unchanged and never accesses its internal fields
 
 #### Scenario: Domain purity is enforced
-- **WHEN** the engine source tree `edd_harness/` is searched for domain vocabulary (e.g. consumer role names like `role-a`, `role-c`, `vote`, `deliberation`)
+- **WHEN** the engine source tree `edd_harness/` is searched for consumer-specific domain or role vocabulary
 - **THEN** no matches are found
 
 ### Requirement: Adapter seam and serialization guarantee

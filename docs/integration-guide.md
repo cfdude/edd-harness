@@ -136,10 +136,10 @@ three-valued: **pass / fail / indeterminate**, and `indeterminate` (adapter rais
 unavailable, shape drift) is excluded from regression accounting so flakes never masquerade as
 regressions.
 
-## Lessons from the first consumer (consumer)
+## Lessons from the first consumer
 
-The a consumer project multi-agent deliberation was the first real adopter. Two empirical findings worth
-heeding before you trust your gate:
+The first real adopter was a multi-agent deliberation — a deliberation system of distinct role agents.
+Two empirical findings worth heeding before you trust your gate:
 
 - **Use K ≥ 3 samples for a trustworthy deterministic gate.** At `samples=2`, *no-change* runs
   produced **false deterministic regressions** — the gate cried wolf. At `samples=3`, two
@@ -151,18 +151,18 @@ heeding before you trust your gate:
   - a **deterministic** REGRESSED → **do-not-ship** (block the merge);
   - a **judge** REGRESSED → **advisory** — review it, don't auto-block.
 
-  edd-harness's `compare` currently classifies all checks uniformly; the deliberation consumer split
+  edd-harness's `compare` currently classifies all checks uniformly; that consumer split
   its own gate on `scorer_type` (deterministic block vs stochastic judge review). Until the engine
   promotes that split (see the v2 backlog), do the same in your CI: gate on deterministic
   REGRESSED, surface judge REGRESSED as a warning.
 - **Scope a relational invariant to the cases where it discriminates — don't blanket-apply it.**
-  The deliberation's "Role A ≥ Role C proceed-lean" ordering is the gold signal on *proceed-dimension*
-  cases (clean-buy, role-a-drift), but it MISSED on a clean-avoid case: a correctly-bearish Role A
-  legitimately held higher PASS conviction than Role C, which strict ordering misreads as a role
-  inversion. The fix was to disable that ordering check on avoid cases, not to weaken it. Lesson:
-  a relational invariant that's sound in one direction can be wrong in another — attach it only to
-  the scenarios where it's actually discriminating.
-- **Judge scorers need rationale PROSE in the captured Output.** The deliberation's judges had thin
+  A role-ordering invariant (one role should lean to proceed at least as much as another) was the
+  gold signal on *proceed-dimension* cases, but it MISSED on a decline case: a correctly-cautious
+  role legitimately held a stronger decline-lean than the role it was "supposed" to trail, which
+  strict ordering misreads as a role inversion. The fix was to disable that ordering check on the
+  decline cases, not to weaken it. Lesson: a relational invariant that's sound in one direction can
+  be wrong in another — attach it only to the scenarios where it actually discriminates.
+- **Judge scorers need rationale PROSE in the captured Output.** That consumer's judges had thin
   signal on proceed votes because the adapter captured structured JSON and the prose rationale had
   been parsed away upstream — leaving the judge little to evaluate. Any field a `JudgeScorer`
   reads (via `render`/`context_keys`) must contain real natural-language rationale; if your
@@ -171,6 +171,6 @@ heeding before you trust your gate:
 
 ## Project-specific adoption
 
-A consumer's actual adoption (which component, which scenarios, where the baseline lives, how the
-gate runs) is tracked in *that project's* own plan. For the a consumer project deliberation, see the
-`consumer` OpenSpec change in the a consumer project repo.
+A consumer's actual adoption — which component, which scenarios, where the baseline lives, how the
+gate runs — belongs in *that project's* own repo and plan, not here. Keep your real scenarios and
+`.edd/` baseline in the consuming project; this library stays domain-agnostic.

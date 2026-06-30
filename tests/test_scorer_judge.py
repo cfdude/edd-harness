@@ -29,16 +29,16 @@ class FakeJudge:
 
 
 def test_unbound_judge_scorer_raises():
-    js = JudgeScorer("role-c_cites", "does it cite a concrete downside?")
+    js = JudgeScorer("rationale_specific", "does it cite a concrete downside?")
     with pytest.raises(RuntimeError):
         js.score({"p1": {}})
 
 
 def test_judge_scorer_records_binary_and_metadata():
-    js = JudgeScorer("role-c_cites", "criteria text", context_keys=("p1",)).bind(
+    js = JudgeScorer("rationale_specific", "criteria text", context_keys=("p1",)).bind(
         FakeJudge(verified=True), "fake-judge-1"
     )
-    r = js.score({"p1": {"role-c": "rationale"}, "secret": "hidden"})
+    r = js.score({"p1": {"agent": "rationale"}, "secret": "hidden"})
     assert r.passed is True
     assert r.meta["judge"] is True
     assert r.meta["backend"] == "fake"
