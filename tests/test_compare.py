@@ -85,3 +85,31 @@ def test_judge_regression_is_advisory_not_blocking():
     assert cmp.has_blocking_regression is False
     assert [i.scorer_name for i in cmp.advisory_regressions] == ["j"]
     assert cmp.blocking_regressions == []
+
+
+def test_mixed_regression_blocks_via_deterministic():
+    # both a deterministic and a judge check regress -> blocking (via the deterministic one)
+    base = {
+        "axes": {
+            "system@v1|fake-1": {
+                "checks": {"s1::det": {"status": "pass"}, "s1::j": {"status": "pass"}}
+            }
+        }
+    }
+    run = RunResult(
+        model_under_test="system@v1",
+        judge_model="fake-1",
+        scenarios=[
+            ScenarioResult(
+                "s1",
+                "fail",
+                [CheckResult("det", "deterministic", "fail"), CheckResult("j", "judge", "fail")],
+                [{}],
+                1,
+            )
+        ],
+    )
+    cmp = compare(run, base)
+    assert cmp.has_blocking_regression is True
+    assert [i.scorer_name for i in cmp.blocking_regressions] == ["det"]
+    assert [i.scorer_name for i in cmp.advisory_regressions] == ["j"]

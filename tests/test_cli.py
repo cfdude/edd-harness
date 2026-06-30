@@ -193,6 +193,9 @@ def test_cli_strict_blocks_on_judge_regression(tmp_path, monkeypatch):
     res = _bless_then_gate(tmp_path, monkeypatch, extra_flags=["--strict"])
     assert res.exit_code == 1, res.output
     assert "REGRESSION" in res.output
+    # under --strict the judge regression IS blocking; output must not contradict that
+    assert "not blocking" not in res.output
+    assert "0 blocking" not in res.output
 
 
 def test_cli_strict_without_baseline_is_noop(tmp_path, monkeypatch):

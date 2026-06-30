@@ -65,12 +65,14 @@ def run(
 
     if baseline:
         cmp = compare_run(result, root=root)
-        typer.echo(_format_comparison(cmp))
-        for adv in cmp.advisory_regressions:
-            typer.echo(
-                f"ADVISORY: judge check regressed (not blocking): "
-                f"{adv.scenario_id}::{adv.scorer_name}"
-            )
+        typer.echo(_format_comparison(cmp, strict=strict))
+        if not strict:
+            # judge regressions are advisory only when not strict; under --strict they block.
+            for adv in cmp.advisory_regressions:
+                typer.echo(
+                    f"ADVISORY: judge check regressed (not blocking): "
+                    f"{adv.scenario_id}::{adv.scorer_name}"
+                )
         blocking = cmp.has_regression if strict else cmp.has_blocking_regression
         if blocking:
             typer.echo("REGRESSION detected.")
@@ -117,14 +119,14 @@ def _verdict_counts(result) -> dict[str, int]:
     return counts
 
 
-def _format_comparison(cmp) -> str:
+def _format_comparison(cmp, strict: bool = False) -> str:
     lines = [
         f"{i.classification:11} {i.scenario_id}::{i.scorer_name} "
         f"(was={i.baseline_status}, now={i.current_status})"
         for i in cmp.items
     ]
-    lines.append(
-        f"-- {len(cmp.items)} check(s); {len(cmp.blocking_regressions)} blocking, "
-        f"{len(cmp.advisory_regressions)} advisory regression(s) --"
-    )
+    # Under --strict, judge regressions are blocking, so reflect that in the counts.
+    n_blocking = len(cmp.blocking_regressions) + (len(cmp.advisory_regressions) if strict else 0)
+    n_advisory = 0 if strict else len(cmp.advisory_regressions)
+    lines.append(f"-- {len(cmp.items)} check(s); {n_blocking} blocking / {n_advisory} advisory --")
     return "\n".join(lines)
