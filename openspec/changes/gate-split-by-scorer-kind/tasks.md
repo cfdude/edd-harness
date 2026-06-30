@@ -15,8 +15,8 @@
 
 - [ ] 2.1 `store.py`: `bless` writes `{status, kind}` per check; baseline reader tolerates pre-v2
   entries that have only `status`
-- [ ] 2.2 `compare.py`: derive a check's kind from the current run, falling back to the
-  baseline-recorded kind when the check is absent from the current run
+- [ ] 2.2 `compare.py`: derive each check's kind from the current run (baseline-persisted `kind`
+  is forward-looking for the deferred vanished-check feature; no fallback logic in v2)
 
 ## 3. Gate semantics + CLI
 

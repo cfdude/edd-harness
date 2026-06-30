@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Run API and CLI entry point
-The library SHALL provide `run(Suite, model_under_test=...)` and an `edd run` command that REQUIRES `--model` (the model under test) and supports `--baseline`, `--tags`, `--samples`, `--no-judge`, and `--strict`. The `--baseline` flag (`baseline=True`) enables comparison against the blessed baseline and the regression gate (see the `results-baselines` capability); it MUST NOT write the baseline (only `bless` does). The `--strict` flag (only meaningful with `--baseline`) makes judge (advisory) regressions blocking; without it, only deterministic regressions gate.
+The library SHALL provide `run(Suite, model_under_test=...)` and an `edd run` command that REQUIRES `--model` (the model under test) and supports `--baseline`, `--tags`, `--samples`, `--no-judge`, and `--strict`. The `--baseline` flag (`baseline=True`) enables comparison against the blessed baseline and the regression gate (see the `results-baselines` capability); it MUST NOT write the baseline (only `bless` does). The `--strict` flag (only meaningful with `--baseline`) makes judge (advisory) regressions blocking; without it, only deterministic regressions gate. Supplied without `--baseline`, `--strict` has no effect.
 
 #### Scenario: model_under_test is required
 - **WHEN** a run is invoked without `model_under_test` / `--model`

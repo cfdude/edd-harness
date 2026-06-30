@@ -33,7 +33,7 @@ Each comparison item SHALL carry the scorer `kind` (`deterministic` | `judge`). 
 - **THEN** `has_blocking_regression` is false, `has_regression` is true, and `advisory_regressions` lists the judge check
 
 ### Requirement: Baseline persists scorer kind
-`bless` SHALL record each check's `kind` alongside its `status` in `baseline.json`. `compare` SHALL derive a check's kind from the current run, falling back to the baseline-recorded kind when the check is absent from the current run. Baselines blessed before this capability (status only) SHALL still load.
+`bless` SHALL record each check's `kind` alongside its `status` in `baseline.json`. `compare` SHALL derive each check's kind from the current run; the persisted baseline `kind` is forward-looking — reserved for the deferred vanished-check feature — and is not otherwise consumed in this capability. Baselines blessed before this capability (status only) SHALL still load.
 
 #### Scenario: Bless records kind
 - **WHEN** `bless` writes the baseline
