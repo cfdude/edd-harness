@@ -151,10 +151,10 @@ Two empirical findings worth heeding before you trust your gate:
   - a **deterministic** REGRESSED → **do-not-ship** (block the merge);
   - a **judge** REGRESSED → **advisory** — review it, don't auto-block.
 
-  edd-harness's `compare` currently classifies all checks uniformly; that consumer split
-  its own gate on `scorer_type` (deterministic block vs stochastic judge review). Until the engine
-  promotes that split (see the v2 backlog), do the same in your CI: gate on deterministic
-  REGRESSED, surface judge REGRESSED as a warning.
+  edd-harness does this split natively: `edd run --baseline` exits non-zero only on a
+  **deterministic** (blocking) regression and reports **judge** regressions as `ADVISORY`.
+  `Comparison.has_blocking_regression` drives the gate (and `blocking_regressions` /
+  `advisory_regressions` list them); `--strict` restores block-on-any.
 - **Scope a relational invariant to the cases where it discriminates — don't blanket-apply it.**
   A role-ordering invariant (one role should lean to proceed at least as much as another) was the
   gold signal on *proceed-dimension* cases, but it MISSED on a decline case: a correctly-cautious

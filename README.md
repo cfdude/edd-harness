@@ -48,8 +48,8 @@ bless(result)                           # promote to .edd/baseline.json (first t
 
 # Later, after a change:
 after = run(SCENARIOS, model_under_test="my-system@v2")
-if compare_run(after).has_regression:   # joins to baseline per (scenario, scorer)
-    raise SystemExit("regression!")
+if compare_run(after).has_blocking_regression:   # a deterministic check regressed
+    raise SystemExit("regression!")              # judge regressions are advisory; see --strict
 ```
 
 ## CLI

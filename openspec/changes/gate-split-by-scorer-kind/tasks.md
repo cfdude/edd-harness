@@ -27,10 +27,10 @@
 
 ## 4. Docs + verification
 
-- [ ] 4.1 Docs: update `docs/integration-guide.md` (the split is now native — drop the "until the
+- [x] 4.1 Docs: update `docs/integration-guide.md` (the split is now native — drop the "until the
   engine promotes the split, do it in your CI" caveat) + a release note for the BREAKING
   exit-code default change (and that `--strict` restores prior behavior)
-- [ ] 4.2 Verification gate: full suite + ruff green; a generic synthetic test (FakeJudge that
+- [x] 4.2 Verification gate: full suite + ruff green; a generic synthetic test (FakeJudge that
   flips while a deterministic `check()` stays stable) asserts: judge-only regression → exit 0,
   deterministic regression → exit 1, `--strict` → exit 1 on the judge regression; domain-purity
   test still passes
