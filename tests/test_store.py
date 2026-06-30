@@ -51,6 +51,9 @@ def test_bless_writes_axis_keyed_baseline(tmp_path):
     checks = data["axes"][ak]["checks"]
     assert checks["s1::det"]["status"] == "pass"
     assert checks["s1::jud"]["status"] == "fail"
+    # v2: kind persisted alongside status
+    assert checks["s1::det"]["kind"] == "deterministic"
+    assert checks["s1::jud"]["kind"] == "judge"
 
 
 def test_bless_preserves_other_axes(tmp_path):

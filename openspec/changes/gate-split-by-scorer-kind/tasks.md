@@ -13,7 +13,7 @@
 
 ## 2. Baseline persists kind
 
-- [ ] 2.1 `store.py`: `bless` writes `{status, kind}` per check; baseline reader tolerates pre-v2
+- [x] 2.1 `store.py`: `bless` writes `{status, kind}` per check; baseline reader tolerates pre-v2
   entries that have only `status`
 - [x] 2.2 `compare.py`: derive each check's kind from the current run (baseline-persisted `kind`
   is forward-looking for the deferred vanished-check feature; no fallback logic in v2)

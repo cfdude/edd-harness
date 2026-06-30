@@ -148,7 +148,7 @@ def bless(run: RunResult, root: str | Path = ".", label: str | None = None) -> P
     baseline = _load_baseline(root)
     ak = axis_key(run.model_under_test, run.judge_model)
     checks = {
-        f"{sr.scenario_id}::{c.name}": {"status": c.status}
+        f"{sr.scenario_id}::{c.name}": {"status": c.status, "kind": c.kind}
         for sr in run.scenarios
         for c in sr.checks
     }
