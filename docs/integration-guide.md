@@ -155,6 +155,19 @@ heeding before you trust your gate:
   its own gate on `scorer_type` (deterministic block vs stochastic judge review). Until the engine
   promotes that split (see the v2 backlog), do the same in your CI: gate on deterministic
   REGRESSED, surface judge REGRESSED as a warning.
+- **Scope a relational invariant to the cases where it discriminates — don't blanket-apply it.**
+  The deliberation's "Role A ≥ Role C proceed-lean" ordering is the gold signal on *proceed-dimension*
+  cases (clean-buy, role-a-drift), but it MISSED on a clean-avoid case: a correctly-bearish Role A
+  legitimately held higher PASS conviction than Role C, which strict ordering misreads as a role
+  inversion. The fix was to disable that ordering check on avoid cases, not to weaken it. Lesson:
+  a relational invariant that's sound in one direction can be wrong in another — attach it only to
+  the scenarios where it's actually discriminating.
+- **Judge scorers need rationale PROSE in the captured Output.** The deliberation's judges had thin
+  signal on proceed votes because the adapter captured structured JSON and the prose rationale had
+  been parsed away upstream — leaving the judge little to evaluate. Any field a `JudgeScorer`
+  reads (via `render`/`context_keys`) must contain real natural-language rationale; if your
+  adapter normalizes output down to structured fields only, your judges are starved. (One more
+  reason judges are advisory and deterministic checks are the gold signal.)
 
 ## Project-specific adoption
 
