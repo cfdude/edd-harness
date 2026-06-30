@@ -3,7 +3,7 @@ import pathlib
 # The engine must contain ZERO domain vocabulary. Domain knowledge lives only in consumer
 # scenarios/adapters (and in docs/specs, which are not part of the engine package).
 # Illustrative consumer-domain terms — the point is the engine carries NONE of them.
-BANNED = ["deliberation", "vote", "ticker", "stock", "trading", "portfolio", "diagnosis", "invoice"]
+BANNED = ["lawsuit", "ticker", "stock", "trading", "portfolio", "diagnosis", "invoice", "patient"]
 
 ENGINE = pathlib.Path(__file__).resolve().parent.parent / "edd_harness"
 

@@ -138,7 +138,7 @@ regressions.
 
 ## Lessons from the first consumer
 
-The first real adopter was a multi-agent deliberation — a deliberation system of distinct role agents.
+The first real adopter was a multi-agent deliberation system of distinct role agents.
 Two empirical findings worth heeding before you trust your gate:
 
 - **Use K ≥ 3 samples for a trustworthy deterministic gate.** At `samples=2`, *no-change* runs
